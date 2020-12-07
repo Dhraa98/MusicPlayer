@@ -3,6 +3,7 @@ package com.musicplayer
 import android.media.MediaPlayer
 import android.os.Bundle
 import android.os.Handler
+import android.os.Message
 import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -15,7 +16,7 @@ import java.lang.String
 import java.util.concurrent.TimeUnit
 
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), MediaPlayer.OnCompletionListener {
     private lateinit var binding: ActivityMainBinding
     private var mediaPlayer: MediaPlayer? = null
     private lateinit var runnable: Runnable
@@ -23,6 +24,7 @@ class MainActivity : AppCompatActivity() {
     private var pause: Boolean = true
     private var listPosition: Int = 0
     private var flag: Int = 0
+    private var totalTime: Int = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +35,13 @@ class MainActivity : AppCompatActivity() {
     private fun initControls() {
         binding.lifecycleOwner = this
         listPosition = intent.getIntExtra("ListPos", 0)
+        mediaPlayer =
+            MediaPlayer.create(applicationContext, musicList[listPosition].musicFile)
+        mediaPlayer!!.start()
+        tvSongName.text = musicList[listPosition].musicName
+        totalTime = mediaPlayer!!.duration
+        playBtn.setImageResource(R.drawable.pause)
+        initializeSeekBar()
         seek_bar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
                 if (mediaPlayer != null && fromUser) {
@@ -49,49 +58,64 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
+
         playBtn.setOnClickListener {
-
-            if (!pause) {
-                if (mediaPlayer!!.isPlaying) {
-                    mediaPlayer!!.pause()
-                    pause = true
-                    playBtn.setImageResource(R.drawable.play)
-
-                }
+            if (mediaPlayer!!.isPlaying) {
+                mediaPlayer!!.pause()
+                pause = true
+                playBtn.setImageResource(R.drawable.play)
             } else {
-                if (mediaPlayer == null) {
-                    mediaPlayer =
-                        MediaPlayer.create(applicationContext, musicList[listPosition].musicFile)
-                } else {
-                    mediaPlayer!!.seekTo(mediaPlayer!!.currentPosition)
-                }
+                mediaPlayer!!.seekTo(mediaPlayer!!.currentPosition)
                 mediaPlayer!!.start()
-                tvSongName.text = musicList[listPosition].musicName
                 playBtn.setImageResource(R.drawable.pause)
-                pause = false
-
             }
+            /* if (!pause) {
+                 if (mediaPlayer!!.isPlaying) {
+                     mediaPlayer!!.pause()
+                     pause = true
+                     playBtn.setImageResource(R.drawable.play)
 
+                 }
+             } else {
+                 if (mediaPlayer == null) {
+                     mediaPlayer =
+                         MediaPlayer.create(applicationContext, musicList[listPosition].musicFile)
+                 } else {
+                     mediaPlayer!!.seekTo(mediaPlayer!!.currentPosition)
+                 }
+                 mediaPlayer!!.start()
+                 tvSongName.text = musicList[listPosition].musicName
+                 playBtn.setImageResource(R.drawable.pause)
+                 pause = false
+
+             }
+ */
 
             initializeSeekBar()
 
 
-            mediaPlayer!!.setOnCompletionListener {
-                playBtn.isEnabled = true
-                pauseBtn.isEnabled = false
-                stopBtn.isEnabled = false
-
-            }
         }
+        mediaPlayer!!.setOnCompletionListener(this)
 
+        /* mediaPlayer!!.setOnCompletionListener {
+
+
+             *//* playBtn.isEnabled = true
+             pauseBtn.isEnabled = false
+             stopBtn.isEnabled = false*//*
+
+
+            next.callOnClick()
+
+        }*/
         // Stop the media player
         stopBtn.setOnClickListener {
             if (mediaPlayer!!.isPlaying || pause.equals(true)) {
                 pause = false
                 seek_bar.setProgress(0)
                 mediaPlayer!!.stop()
-               /* mediaPlayer!!.reset()
-                mediaPlayer!!.release()*/
+                /* mediaPlayer!!.reset()
+                 mediaPlayer!!.release()*/
 
                 handler.removeCallbacks(runnable)
 
@@ -136,22 +160,42 @@ class MainActivity : AppCompatActivity() {
                 tv_pass.text = ""
                 tv_due.text = ""
                 handler.removeCallbacks(runnable)
-
                 if (listPosition == musicList.size - 1) {
                     listPosition = 0
 
                 } else {
                     listPosition = listPosition + 1
                 }
-                flag == 1
+
                 mediaPlayer =
                     MediaPlayer.create(applicationContext, musicList[listPosition].musicFile)
                 mediaPlayer!!.start()
                 tvSongName.text = musicList[listPosition].musicName
                 initializeSeekBar()
 
+
+            } else {
+                if (listPosition == musicList.size - 1) {
+                    listPosition = 0
+
+                } else {
+                    listPosition = listPosition + 1
+                }
+
+                mediaPlayer =
+                    MediaPlayer.create(applicationContext, musicList[listPosition].musicFile)
+                mediaPlayer!!.start()
+                tvSongName.text = musicList[listPosition].musicName
+                initializeSeekBar()
             }
+
+            mediaPlayer!!.setOnCompletionListener(this)
+
         }
+    }
+
+    override fun onCompletion(p0: MediaPlayer?) {
+        next.callOnClick()
     }
 
     private fun initializeSeekBar() {
@@ -173,6 +217,9 @@ class MainActivity : AppCompatActivity() {
             val seconds = diff % 60;
             tv_pass.text = "0${((diff % 3600) / 60).toString()}:$seconds"
             tv_due.text = time
+            if (diff == 0) {
+                next.callOnClick()
+            }
 
             handler.postDelayed(runnable, 1000)
         }
@@ -189,7 +236,12 @@ class MainActivity : AppCompatActivity() {
         super.onPause()
     }
 
-
+    override fun onResume() {
+        super.onResume()
+        if (mediaPlayer != null) {
+            mediaPlayer!!.start();
+        }
+    }
 
     override fun onDestroy() {
 
