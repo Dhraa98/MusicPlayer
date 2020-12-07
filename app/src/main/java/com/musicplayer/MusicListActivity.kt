@@ -27,6 +27,9 @@ class MusicListActivity : AppCompatActivity() {
 
     private fun initControls() {
         binding.lifecycleOwner = this
+        if (musicList.size > 0) {
+            musicList.clear()
+        }
         var model: MusicModel = MusicModel()
         model.musicFile = R.raw.maroon
         model.musicName = "Girls like you"
@@ -57,6 +60,7 @@ class MusicListActivity : AppCompatActivity() {
             val intent = Intent(this, MainActivity::class.java)
             intent.putExtra("ListPos", position)
             startActivity(intent)
+
         })
         manager = LinearLayoutManager(this)
         rvList.adapter = adapter

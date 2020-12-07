@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
                     mediaPlayer!!.pause()
                     pause = true
                     playBtn.setImageResource(R.drawable.play)
-                    Toast.makeText(this, "media playing", Toast.LENGTH_SHORT).show()
+
                 }
             } else {
                 if (mediaPlayer == null) {
@@ -69,7 +69,7 @@ class MainActivity : AppCompatActivity() {
                 tvSongName.text = musicList[listPosition].musicName
                 playBtn.setImageResource(R.drawable.pause)
                 pause = false
-                Toast.makeText(this, "media paused", Toast.LENGTH_SHORT).show()
+
             }
 
 
@@ -80,7 +80,7 @@ class MainActivity : AppCompatActivity() {
                 playBtn.isEnabled = true
                 pauseBtn.isEnabled = false
                 stopBtn.isEnabled = false
-                Toast.makeText(this, "end", Toast.LENGTH_SHORT).show()
+
             }
         }
 
@@ -90,18 +90,12 @@ class MainActivity : AppCompatActivity() {
                 pause = false
                 seek_bar.setProgress(0)
                 mediaPlayer!!.stop()
-                mediaPlayer!!.reset()
-                mediaPlayer!!.release()
+               /* mediaPlayer!!.reset()
+                mediaPlayer!!.release()*/
 
                 handler.removeCallbacks(runnable)
 
-                tv_pass.text = ""
-                tv_due.text = ""
-                playBtn.isEnabled = true
-                pauseBtn.isEnabled = false
-                stopBtn.isEnabled = false
 
-                Toast.makeText(this, "media stop", Toast.LENGTH_SHORT).show()
             }
 
         }
@@ -129,7 +123,7 @@ class MainActivity : AppCompatActivity() {
                 mediaPlayer!!.start()
                 tvSongName.text = musicList[listPosition].musicName
                 initializeSeekBar()
-                Toast.makeText(this, "media playing", Toast.LENGTH_SHORT).show()
+
             }
         }
         next.setOnClickListener {
@@ -155,7 +149,7 @@ class MainActivity : AppCompatActivity() {
                 mediaPlayer!!.start()
                 tvSongName.text = musicList[listPosition].musicName
                 initializeSeekBar()
-                Toast.makeText(this, "media playing", Toast.LENGTH_SHORT).show()
+
             }
         }
     }
@@ -191,17 +185,21 @@ class MainActivity : AppCompatActivity() {
         if (mediaPlayer != null) {
             stopBtn.callOnClick()
         }
+
         super.onPause()
     }
+
+
 
     override fun onDestroy() {
 
         if (mediaPlayer != null) {
             stopBtn.callOnClick()
+
         }
+
         super.onDestroy()
     }
-
 
 }
 
